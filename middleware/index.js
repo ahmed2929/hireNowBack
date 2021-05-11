@@ -8,7 +8,7 @@ const hpp = require("hpp");
 const rateLimit = require("express-rate-limit");
 const cors = require("cors");
 require("dotenv").config();
-
+const {port} =require("../config")
 module.exports= (app)=>{
 
  // secure HTTP headers
@@ -55,7 +55,7 @@ app.use(hpp());
 app.get("/", (req, res) => {
   res.status(200).json({
     status: "Success",
-    message: `Welcome to PMS API served on port ${port}`,
+    message: `Welcome to HireNow API served on port ${port}`,
   });
 });
 

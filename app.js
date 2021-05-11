@@ -1,14 +1,17 @@
-const middleware =require("./middleware")
-const express = require("express");
-const connectDB =require("./config/connectDB")
-const {port} =require("./config")
-let app = express();
-require("dotenv").config();
+ const connectDB =require("./config/connectDB")
+ const {port} =require("./config")
+ const {startApolloServer} =require("./server")
+ require("dotenv").config();
 
-// set middleware
-app=middleware(app)
-connectDB()
-//listening to port
-app.listen(port, () => {
-  console.log(`HireNow Server is running on port ${port}`);
-});
+
+const {app,server}=appStartUp()
+
+async function  appStartUp(){
+
+  // // connect to BD
+ await connectDB()
+ // // setup graph appolo server
+ 
+ return await startApolloServer()
+ 
+}
