@@ -1,25 +1,4 @@
-const { gql } = require('apollo-server-express');
-const { models } = require('mongoose');
+const root=require("./root")
+const user=require("./user")
 
-const typeDefs = gql`
-  # Comments in GraphQL strings (such as this one) start with the hash (#) symbol.
-
-  # This "Book" type defines the queryable fields for every book in our data source.
-  type freelancer {
-    name: String
-    email: String
-    photo:String
-    emailVerfied:Boolean
-  }
-
-  # The "Query" type is special: it lists all of the available queries that
-  # clients can execute, along with the return type for each. In this
-  # case, the "books" query returns an array of zero or more Books (defined above).
-  type Query {
-    freelancers: [freelancer]
-
-  }
-`;
-module.exports={
-    typeDefs
-}
+module.exports=[root,user]

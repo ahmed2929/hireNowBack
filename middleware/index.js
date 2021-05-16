@@ -10,10 +10,44 @@ const cors = require("cors");
 require("dotenv").config();
 const {port} =require("../config")
 module.exports= (app)=>{
-
+console.debug("funct runs")
+app.disable("x-powered-by")
  // secure HTTP headers
-app.use(helmet());
-
+ app.use(
+  helmet({
+    /**
+     * Default helmet policy + own customizations - graphiql support
+     * https://helmetjs.github.io/
+     */
+    contentSecurityPolicy: {
+      directives: {
+        defaultSrc: [
+          "'self'",
+          /** @by-us - adds graphiql support over helmet's default CSP */
+          "'unsafe-inline'",
+        ],
+        baseUri: ["'self'"],
+        blockAllMixedContent: [],
+        fontSrc: ["'self'", 'https:', 'data:'],
+        frameAncestors: ["'self'"],
+        imgSrc: ["'self'", 'data:'],
+        objectSrc: ["'none'"],
+        scriptSrc: [
+          "'self'",
+          /** @by-us - adds graphiql support over helmet's default CSP */
+          "'unsafe-inline'",
+          /** @by-us - adds graphiql support over helmet's default CSP */
+          "'unsafe-eval'",
+        ],
+        upgradeInsecureRequests: [],
+      },
+    },
+  }),
+);
+app.use((req,res,next)=>{
+console.debug("melle ware runssssssssss")
+   next()
+})
 //Enable cors
 app.use(cors());
 

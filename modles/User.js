@@ -1,8 +1,8 @@
-const mongoose = require('mongoose');
+const  mongoose =require ('mongoose');
 
 const schema   = mongoose.Schema;
 
-const freelancer = new schema({
+const User = new schema({
      
     name:{
         type:String,
@@ -25,6 +25,11 @@ const freelancer = new schema({
         type:Boolean,
         default:false
     },
+    act:{
+        type:String,
+        enum:['freelancer','employer'],
+        required:true
+    }
    
   
     
@@ -32,4 +37,4 @@ const freelancer = new schema({
 
 });
 
-module.exports = mongoose.model('freelancer',freelancer);
+module.exports = mongoose.model('User',User);

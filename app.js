@@ -2,9 +2,10 @@
  const {port} =require("./config")
  const {startApolloServer} =require("./server")
  require("dotenv").config();
+ const middleware=require("./middleware/index")
 
 
-const {app,server}=appStartUp()
+let {app,server}=appStartUp()
 
 async function  appStartUp(){
 
