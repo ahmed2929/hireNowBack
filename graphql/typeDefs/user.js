@@ -4,12 +4,13 @@ module.exports=gql`
 extend type Query {
     profile:User
     users:[User!]!
-    refreshToken:Auth!
+    getNewToken(refreshToken:String!):Auth!
     login(
         email:String!,
         password:String!
 
     ):Auth!
+    logout(token:String!):String
 
 }
 

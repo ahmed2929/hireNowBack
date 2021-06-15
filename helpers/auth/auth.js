@@ -1,12 +1,13 @@
 const jwt =require("jsonwebtoken");
 const bycript =require("bcryptjs")
 const {JWT_RefreshToken_ExpireIn,JWT_RefreshToken_Secret,JWT_Token_ExpireIn,JWT_Token_Secret}=require("../../config/index")
-const generateToken=async(email)=>{
+const {redis_client} =require("../../config/redisConnect")
+const generateToken=async(id)=>{
     try{
 
         const token  = jwt.sign(
             {
-                email:email.toString()
+                sub:id.toString()
             },
            JWT_Token_Secret,
             { expiresIn: JWT_Token_ExpireIn }
@@ -21,17 +22,23 @@ const generateToken=async(email)=>{
 }
 
 
-const generateRefreshToken=async(email)=>{
+const generateRefreshToken=async(id)=>{
     try{
 
-        const token  = jwt.sign(
+        const refreshtoken  = jwt.sign(
             {
-                email:email.toString()
+                sub:id.toString()
             },
             JWT_RefreshToken_Secret,
             { expiresIn: JWT_RefreshToken_ExpireIn }
         );
-    return token
+
+        await redis_client.set(id.toString(),JSON.stringify({token:refreshtoken}),(err,data)=>{
+            if(err) throw err;
+
+        })
+
+    return refreshtoken
 
     }catch(err){
         console.debug(err)
@@ -66,6 +73,13 @@ const checkRefreshToken=async(token)=>{
         error.statusCode = 401;
         throw error;
       }
+
+      redis_client.get(decodedToken.sub.toString(),(err,data)=>{
+        if(err) throw err;
+        if(data===null) throw new Error("invalid request token is not stored");
+        if(JSON.parse(data).token!=args.refreshToken.toString()) throw new Error("invalid refresh token")
+      })
+
     return decodedToken
 
     }catch(err){
