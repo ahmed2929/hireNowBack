@@ -2,14 +2,10 @@ const { gql } = require('apollo-server-express');
 
 module.exports=gql`
 extend type Query {
-    profile:User
+    profile:User @isAuth
     users:[User!]!
     getNewToken(refreshToken:String!):Auth!
-    login(
-        email:String!,
-        password:String!
-
-    ):Auth!
+  
     logout(token:String!):String
 
 }
@@ -21,6 +17,11 @@ extend type Mutation {
         email:String!
         act:String!
     ):Auth
+    login(
+        email:String!,
+        password:String!
+
+    ):Auth!
 
 }
 
@@ -29,10 +30,12 @@ type User{
     name:String!
     email:String!
     photo:String!
+    act:String!
+    emailVerfied:Boolean!
 }
 
 type Auth{
-    user:User
+    user:User!
     token:String!
     refreshToken:String!
 }

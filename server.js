@@ -4,12 +4,29 @@ const express = require("express");
 const { ApolloServer } = require("apollo-server-express");
 const typeDefs =require("./graphql/typeDefs") 
 const resolvers =require("./graphql/resolvers") 
+const {schemaDirectives} =require("./graphql/directives/auth.directive")
+const {isAuth} =require("./helpers/auth/auth")
 async function startApolloServer() {
-  
-    const server = new ApolloServer({ typeDefs, resolvers });
+  let app = express();
+  app.use(isAuth)
+    const server = new ApolloServer({
+       typeDefs,
+      resolvers,
+      schemaDirectives,
+      context:({req})=>{
+        let {isAuth,user} =req;
+        return {
+          isAuth,
+          user,
+          req
+        }
+      } 
+      
+      
+      });
     await server.start();
   
-    let app = express();
+    
     server.applyMiddleware({ app });
     // set middleware
     await new Promise(resolve => app.listen({ port }, resolve));

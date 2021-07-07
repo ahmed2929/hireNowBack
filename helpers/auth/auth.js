@@ -2,6 +2,10 @@ const jwt =require("jsonwebtoken");
 const bycript =require("bcryptjs")
 const {JWT_RefreshToken_ExpireIn,JWT_RefreshToken_Secret,JWT_Token_ExpireIn,JWT_Token_Secret}=require("../../config/index")
 const {redis_client} =require("../../config/redisConnect")
+const {ApolloError}=require("apollo-server-express")
+const User =require("../../modles/User")
+const util =require("util")
+
 const generateToken=async(id)=>{
     try{
 
@@ -34,6 +38,7 @@ const generateRefreshToken=async(id)=>{
         );
 
         await redis_client.set(id.toString(),JSON.stringify({token:refreshtoken}),(err,data)=>{
+            console.debug("refreshToken craeted redis ",data)
             if(err) throw err;
 
         })
@@ -69,19 +74,28 @@ const checkRefreshToken=async(token)=>{
 
       let  decodedToken = await jwt.verify(token,process.env.JWT_RefreshToken_Secret);
       if(!decodedToken){
-        const error = new Error('not Authorized!!');
+        const error = new ApolloError('not Authorized!!');
         error.statusCode = 401;
         throw error;
       }
+      let get = util.promisify(redis_client.get).bind(redis_client);
 
-      redis_client.get(decodedToken.sub.toString(),(err,data)=>{
-        if(err) throw err;
-        if(data===null) throw new Error("invalid request token is not stored");
-        if(JSON.parse(data).token!=args.refreshToken.toString()) throw new Error("invalid refresh token")
-      })
+      const  data=await get(decodedToken.sub.toString())
+        if(data===null){ 
+          throw new ApolloError("invalid request token is not stored");
+         
+        }
+        console.debug("data is ",data)
+        if(JSON.parse(data).token!=token.toString() ){
+            throw new ApolloError("invalid refresh token")
+          
+        }
 
-    return decodedToken
+     
+        return decodedToken
 
+  
+     
     }catch(err){
         console.debug(err)
         throw err
@@ -115,11 +129,58 @@ const comparePassword=async(Pass,hashedpass)=>{
 }
 
 
+
+const isAuth = async (req, res, next) => {
+  
+    // Extract Authorization Header
+    const authHeader = req.get("Authorization");
+    if (!authHeader) {
+        req.isAuth = false;
+        return next();
+    }
+
+    // Extract the token and check for token
+    const token = authHeader.split(" ")[1];
+    if (!token || token === "") {
+        req.isAuth = false;
+        return next();
+    }
+
+    // Verify the extracted token
+    let decodedToken;
+    try {
+        decodedToken = await jwt.verify(token,process.env.JWT_Token_Secret);
+    } catch (err) {
+        req.isAuth = false;
+        return next();
+    }
+
+    // If decoded token is null then set authentication of the request false
+    if (!decodedToken) {
+        req.isAuth = false;
+        return next();
+    }
+
+    // If the user has valid token then Find the user by decoded token's id
+    console.debug("decoded is ",decodedToken)
+    let authUser = await User.findById(decodedToken.sub.toString());
+    if (!authUser) {
+        req.isAuth = false;
+        return next();
+    }
+
+    req.isAuth = true;
+    req.user = authUser;
+    return next();
+}
+
+
 module.exports={
     generateRefreshToken,
     generateToken,
     checkRefreshToken,
     checkToken,
     hashPassword,
-    comparePassword
+    comparePassword,
+    isAuth
 }

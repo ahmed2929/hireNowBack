@@ -27,7 +27,7 @@ const User = new schema({
     },
     act:{
         type:String,
-        enum:['freelancer','employer'],
+        enum:['1','2'],
         required:true
     }
    

@@ -9,6 +9,7 @@ const rateLimit = require("express-rate-limit");
 const cors = require("cors");
 require("dotenv").config();
 const {port} =require("../config")
+const {isAuth} =require("../helpers/auth/auth")
 module.exports= (app)=>{
 console.debug("funct runs")
 app.disable("x-powered-by")
@@ -83,7 +84,7 @@ app.use(xss());
 
 //HTTP parament pollution
 app.use(hpp());
-
+app.use(isAuth)
 
 
 app.get("/", (req, res) => {

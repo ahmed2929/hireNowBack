@@ -2,13 +2,23 @@ const User =require("../../modles/User")
 const {generateRefreshToken,generateToken,hashPassword,comparePassword,checkRefreshToken,checkToken}=require("../../helpers/auth/auth")
 const {redis_client} =require('../../config/redisConnect');
 const { json } = require("express");
+const {registerValidateSchem,loginSchema, loginvalidationSchema} =require("../../validation/auth/auth")
 module.exports={
      Query :{
-        profile:()=>{},
-        users:()=>{},
+        profile:(root,args,{req},info)=>{
+          const {name,email,photo,id}=req.user
+        
+         
+          return {
+          name,email,photo,id
+          }
+        },
+        users:(root,args,{req},info)=>{
+          
+        },
         getNewToken:async(root,args,{req},info)=>{
           const validToken=await checkRefreshToken(args.refreshToken.toString());
-          const user_id=validToken.sub._id.toString;
+          const user_id=validToken.sub.toString();
           const token= generateToken(user_id);
           const refreshToken=generateRefreshToken(user_id)
         return{
@@ -23,7 +33,38 @@ module.exports={
           await redis_client.set('BL_' + user._id.toString(), token);
         },
         
+     
+      },
+      
+       Mutation :{
+        register:async(root,args,{req},info)=>{
+          const {value ,error} =registerValidateSchem.validate(args)
+          if(error) throw new Error(error.details[0].message)
+          const exist=await User.findOne({email:args.email})
+           if(exist){
+             throw new Error("user already exist")
+           }
+           const hashedPass=await hashPassword(args.password)
+         const newUser=new User({
+            ...args,
+            password:hashedPass
+         })
+         await newUser.save()
+         const token= generateToken(newUser._id.toString());
+         const refreshToken=generateRefreshToken(newUser._id.toString())
+         return {
+         user:{ ...newUser._doc,id:newUser._id},
+        token,
+        refreshToken
+         }
+
+
+        },
+      
+
         login:async(root,args,{req},info)=>{
+          const {value ,error} =loginvalidationSchema.validate(args)
+          if(error) throw new Error(error.details[0].message)
           const exist=await User.findOne({email:args.email})
            if(!exist){
              throw new Error("no user found!")
@@ -35,9 +76,9 @@ module.exports={
 
           const token= generateToken(exist._id);
          const refreshToken=generateRefreshToken(exist._id)
-        
+          console.debug("user is ", {...exist._doc,id:exist._id})
          return {
-         user:{ ...exist._doc},
+         user:{ ...exist._doc,id:exist._id},
         token,
         refreshToken
          }
@@ -45,31 +86,6 @@ module.exports={
 
         }
       
-      },
-      
-       Mutation :{
-        register:async(root,args,{req},info)=>{
-          console.debug("creating user")
-          const exist=await User.findOne({email:args.email})
-           if(exist){
-             throw new Error("user already exist")
-           }
-           const hashedPass=await hashPassword(args.password)
-         const newUser=new User({
-            ...args,
-            password:hashedPass
-         })
-         await newUser.save()
-         const token= generateToken(args.email);
-         const refreshToken=generateRefreshToken(args.email)
-         return {
-         user:{ ...newUser._doc},
-        token,
-        refreshToken
-         }
 
-
-        }
-      
       }
 }
