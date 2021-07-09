@@ -4,7 +4,8 @@ const {JWT_RefreshToken_ExpireIn,JWT_RefreshToken_Secret,JWT_Token_ExpireIn,JWT_
 const {redis_client} =require("../../config/redisConnect")
 const {ApolloError}=require("apollo-server-express")
 const User =require("../../modles/User")
-const util =require("util")
+const util =require("util");
+const console = require("console");
 
 const generateToken=async(id)=>{
     try{
@@ -131,9 +132,10 @@ const comparePassword=async(Pass,hashedpass)=>{
 
 
 const isAuth = async (req, res, next) => {
-  
+ 
     // Extract Authorization Header
     const authHeader = req.get("Authorization");
+ //   console.debug("authHeader is ",req)
     if (!authHeader) {
         req.isAuth = false;
         return next();
@@ -141,6 +143,7 @@ const isAuth = async (req, res, next) => {
 
     // Extract the token and check for token
     const token = authHeader.split(" ")[1];
+    
     if (!token || token === "") {
         req.isAuth = false;
         return next();
@@ -162,7 +165,7 @@ const isAuth = async (req, res, next) => {
     }
 
     // If the user has valid token then Find the user by decoded token's id
-    console.debug("decoded is ",decodedToken)
+    
     let authUser = await User.findById(decodedToken.sub.toString());
     if (!authUser) {
         req.isAuth = false;

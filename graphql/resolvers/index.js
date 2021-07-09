@@ -1,3 +1,4 @@
 
 const  user =require("./user")
-module.exports=[user]
+const employer=require("./employer")
+module.exports=[user,employer]

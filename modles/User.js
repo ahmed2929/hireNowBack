@@ -29,9 +29,20 @@ const User = new schema({
         type:String,
         enum:['1','2'],
         required:true
-    }
+    },
+    postedJobs:[
+        {
+            type:mongoose.Schema.Types.ObjectId,
+                ref:'Jobs'
+        }
+    ],
    
-  
+  applyedJobs:[
+    {
+        type:mongoose.Schema.Types.ObjectId,
+            ref:'Jobs'
+    }
+  ]
     
 
 
