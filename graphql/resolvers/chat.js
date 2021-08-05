@@ -3,6 +3,8 @@ const User=require("../../modles/User")
 const Room =require("../../modles/Room")
 const {PubSub} =require('apollo-server-express')
 const { subscribe } = require("graphql")
+const { withFilter } =require('graphql-subscriptions');
+
 const pubsub=new PubSub()
 module.exports={
      Query :{
@@ -145,10 +147,14 @@ module.exports={
 
          pubsub.publish(`NEW_MESSAGE`,{newMessage:{
           
-          id:newMessage._id,
+          _id:newMessage._id,
           content:args.content,
-          from:req.user,
-          to:user
+          from:req.user._id,
+          to:args.to,
+          RoomId:newRoom._id,
+
+
+
           
         }})
 
@@ -170,12 +176,44 @@ module.exports={
       
 
       },
-      Subscription:{
-
-        newMessage:async(root,args,{req},info)=>{
-          subscribe:()=>pubsub.asyncIterator(['NEW_MESSAGE'])
-
-        }
-      }
+   
+        Subscription: {
+          newMessage: {
+            subscribe: withFilter(
+              () => pubsub.asyncIterator('NEW_MESSAGE'),
+              ({newMessage}, variables,{currentUser}) => {
+                // Only push an update if the comment is on
+                // the correct repository for this operation
+               
+                return (newMessage.to === currentUser.id);
+              },
+            ),
+         
+          },
+        },
+       
+    
       
 }
+
+/*
+  subscribe: withFilter(
+              (_,__,{currentUser}) => {
+
+                console.debug("current user from the subscribe ",currentUser)
+                 pubsub.asyncIterator(['NEW_MESSAGE'])
+
+               
+              },
+              ({newMessage},_,{currentUser}) => {
+                
+                if(newMessage.to === currentUser.id){
+                  return true
+
+                }else{
+                  return false
+                }
+
+              },
+            ) 
+*/

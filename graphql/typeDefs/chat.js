@@ -51,7 +51,7 @@ type roomUser{
 
 
 extend type Subscription {
-    newMessage:chatMessage @isAuth
+    newMessage:chatMessage 
 }
 
 `
