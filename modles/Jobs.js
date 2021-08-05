@@ -1,5 +1,5 @@
 const  mongoose =require ('mongoose');
-const User=require('./User')
+const User=require('./User');
 const schema   = mongoose.Schema;
 
 const job = new schema({
@@ -46,7 +46,18 @@ const job = new schema({
             message: '{VALUE} is not supported'
         },
         default:'0'
-    }
+    },
+    Descrition:String,
+    proposals:[{ 
+        type:mongoose.Schema.Types.ObjectId,
+        ref:'Proposal'
+
+     }],
+     freelancer:{
+        type:mongoose.Schema.Types.ObjectId,
+        ref:'User'
+     }
+
 
 
 },{timestamps:true});
@@ -66,5 +77,21 @@ const job = new schema({
      }
     
  };
+
+
+ job.methods.bindUserWithJob = async function (apllayerId,jobID){
+    try {
+       
+       const user=await User.findById(apllayerId);
+       user.applyedJobs.push(jobID)
+       await user.save();
+       return true
+       
+       
+    } catch (error) {
+        throw new Error(error)
+    }
+   
+};
 
 module.exports = mongoose.model('Job',job);

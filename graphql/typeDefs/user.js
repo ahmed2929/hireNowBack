@@ -21,7 +21,14 @@ extend type Mutation {
         email:String!,
         password:String!
 
-    ):Auth!
+    ):Auth!,
+    summitPropsal(
+        job_id:String!,
+        Comment:String,
+        file_uri:String,
+
+
+    ):message @isAuth
 
 }
 
@@ -40,7 +47,11 @@ type Auth{
     refreshToken:String!
 }
 
+ 
 
+ type message{
+    message:String
+ }
 
 
 `

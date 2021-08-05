@@ -1,11 +1,14 @@
 const User =require("../../modles/User")
 const {generateRefreshToken,generateToken,hashPassword,comparePassword,checkRefreshToken,checkToken}=require("../../helpers/auth/auth")
 const {redis_client} =require('../../config/redisConnect');
+const Proposal=require("../../modles/proposal")
 const { json } = require("express");
-const {registerValidateSchem,loginSchema, loginvalidationSchema} =require("../../validation/auth/auth")
+const {registerValidateSchem,loginSchema, loginvalidationSchema} =require("../../validation/auth/auth");
+const Jobs = require("../../modles/Jobs");
 module.exports={
      Query :{
         profile:(root,args,{req},info)=>{
+          console.debug("profile runs")
           const {name,email,photo,id}=req.user
         
          
@@ -81,6 +84,25 @@ module.exports={
          user:{ ...exist._doc,id:exist._id},
         token,
         refreshToken
+         }
+
+
+        },
+
+        summitPropsal:async(root,args,{req},info)=>{
+          const jobCreator =await Jobs.findById(args.job_id)
+          .select("creator")
+          
+          const newProposal=new Proposal({
+            ...args,
+            applicant:req.user.id,
+            jobCreator:jobCreator._doc.creator
+
+          })
+         await newProposal.save();
+         
+         return {
+          message:"succesfully created proposal"
          }
 
 

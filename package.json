@@ -10,11 +10,17 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "@ardatan/aggregate-error": "^0.0.6",
+    "@graphql-tools/schema": "^8.0.2",
     "apollo-server": "^2.24.0",
     "apollo-server-express": "^2.24.0",
+    "cloudinary": "^1.26.2",
     "esm": "^3.2.25",
+    "globalthis": "^1.0.2",
     "graphql": "^15.5.0",
     "joi": "^17.4.0",
-    "redis": "^3.1.2"
+    "multer": "^1.4.2",
+    "redis": "^3.1.2",
+    "subscriptions-transport-ws": "^0.9.19"
   }
 }

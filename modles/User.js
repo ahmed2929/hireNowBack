@@ -33,14 +33,14 @@ const User = new schema({
     postedJobs:[
         {
             type:mongoose.Schema.Types.ObjectId,
-                ref:'Jobs'
+                ref:'Job'
         }
     ],
    
-  applyedJobs:[
+    Proposals:[
     {
         type:mongoose.Schema.Types.ObjectId,
-            ref:'Jobs'
+            ref:'Proposal'
     }
   ]
     

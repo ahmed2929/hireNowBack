@@ -1,4 +1,5 @@
 
 const  user =require("./user")
 const employer=require("./employer")
-module.exports=[user,employer]
+const chat =require("./chat")
+module.exports=[user,employer,chat]

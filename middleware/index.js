@@ -10,8 +10,38 @@ const cors = require("cors");
 require("dotenv").config();
 const {port} =require("../config")
 const {isAuth} =require("../helpers/auth/auth")
+const multer=require('multer')
+const  cloudinary = require('cloudinary').v2;
+const path =require("path")
+const fs=require("fs")
+cloudinary.config({ 
+  cloud_name: 'dzxdrtfbw', 
+  api_key: '512788788339421', 
+  api_secret: 'RCiIvFPr9ATumrqK8-SjQfYOrLU' 
+});
+
+var storage=multer.diskStorage({
+  destination:(req,file,cb)=>{
+      cb(null,'uploads')
+  },
+  filename:(req,file,cb)=>{
+  cb(null,file.fieldname+'-'+Date.now()+path.extname(file.originalname))
+  
+  
+  
+  }
+  
+  
+  
+  })
+
+  var upload=multer({
+    storage:storage,
+   
+})  
+
 module.exports= (app)=>{
-console.debug("funct runs")
+
 app.disable("x-powered-by")
  // secure HTTP headers
  app.use(
@@ -87,12 +117,42 @@ app.use(hpp());
 app.use(isAuth)
 
 
+
+
 app.get("/", (req, res) => {
   res.status(200).json({
     status: "Success",
     message: `Welcome to HireNow API served on port ${port}`,
   });
 });
+
+app.post('/upload',upload.any('file'),(req,res)=>{
+
+  cloudinary.uploader.upload(req.files[0].path,{ resource_type: "auto",flags: `attachment:${req.files[0].fieldname}` },
+   function(error, result) {
+            
+       console.debug(error, result);
+         
+          fs.unlinkSync(req.files[0].path)
+          res.json({message:"file saved",url:result.url})
+       
+        
+
+
+
+      }
+   );
+
+
+
+
+
+})
+
+
+
+
+
 
 //Handling unhandle routes
 app.all("*", (req, res, next) => {

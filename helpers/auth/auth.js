@@ -135,7 +135,7 @@ const isAuth = async (req, res, next) => {
  
     // Extract Authorization Header
     const authHeader = req.get("Authorization");
- //   console.debug("authHeader is ",req)
+  // console.debug("authHeader is ",authHeader)
     if (!authHeader) {
         req.isAuth = false;
         return next();
@@ -166,12 +166,13 @@ const isAuth = async (req, res, next) => {
 
     // If the user has valid token then Find the user by decoded token's id
     
-    let authUser = await User.findById(decodedToken.sub.toString());
+    let authUser = await User.findById(decodedToken.sub.toString())
+    .populate('postedJobs')
     if (!authUser) {
         req.isAuth = false;
         return next();
     }
-
+    //console.debug(authUser)
     req.isAuth = true;
     req.user = authUser;
     return next();
