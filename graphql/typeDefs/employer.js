@@ -57,7 +57,8 @@ type Proposal{
     job_id:Job,
     applicant:User,
     Comment:String,
-    file_uri:String
+    file_uri:String,
+    status:String,
 
 }
 type proposals{

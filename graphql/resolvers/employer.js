@@ -83,19 +83,39 @@ module.exports={
 
         getProposals:async (root,args,{req},info)=>{
          
-        
-         const proposals =await Proposals.find({jobCreator:req.user.id,status:'pending'})
-         .populate('applicant')
-         .populate('job_id')
-         
-        
+        if(req.user.act==='2'){
 
-           return {
-            proposals:proposals
-            
+          const proposals =await Proposals.find({jobCreator:req.user.id,status:'pending'})
+          .populate('applicant')
+          .populate('job_id')
+          
+         
+ 
+            return {
+             proposals:proposals
              
-            
-          }
+              
+             
+           }
+
+
+        }else{
+
+          const proposals =await Proposals.find({applicant:req.user.id})
+          .populate('applicant')
+          .populate('job_id')
+          
+         
+ 
+            return {
+             proposals:proposals
+             
+              
+             
+           }
+
+        }
+      
 
 
 
